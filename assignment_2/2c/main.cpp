@@ -1,4 +1,7 @@
 #include <iostream>
+#include <cstdlib>
+#include <complex>
+#include <vector>
 
 class Mandelbrot_set {
 private:
@@ -7,6 +10,21 @@ private:
     short int I_max=0;
     double x_L, y_L, x_R, y_R;
     double delta_x,delta_y;
+    std::vector<std::complex<double>> grid;
+
+    void initialize_grid() {
+    delta_x = (x_R - x_L) / (n_x);
+    delta_y = (y_R - y_L) / (n_y);
+    grid.resize(n_x * n_y);
+    for (size_t i = 0; i < n_x; ++i) {
+        for (size_t j = 0; j < n_y; ++j) {
+            double real_part = x_L + i * delta_x;
+            double imag_part = y_L + j * delta_y;
+            std::cout << "global_index:"<<i *n_y +j << std::endl;
+            grid[i * n_y + j] = std::complex<double>(real_part, imag_part); // Access using row-major order
+        }
+    }
+    }
 
 public:
     Mandelbrot_set(unsigned int nx, unsigned int ny, double xl, double yl, double xr, double yr, short int imax)
