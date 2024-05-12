@@ -2,6 +2,9 @@
 #include <cstdlib>
 #include <complex>
 #include <vector>
+#include <cstring>
+
+extern "C" void write_pgm_image(void* image, int maxval, int xsize, int ysize, const char* image_name);
 
 class Mandelbrot_set {
 private:
@@ -20,15 +23,25 @@ private:
         for (size_t j = 0; j < n_y; ++j) {
             double real_part = x_L + i * delta_x;
             double imag_part = y_L + j * delta_y;
-            std::cout << "global_index:"<<i *n_y +j << std::endl;
             grid[i * n_y + j] = std::complex<double>(real_part, imag_part); // Access using row-major order
         }
     }
     }
 
+
+public:
+    Mandelbrot_set(unsigned int nx, unsigned int ny, double xl, double yl, double xr, double yr, short int imax)
+        : n_x(nx), n_y(ny), x_L(xl), y_L(yl), x_R(xr), y_R(yr), I_max(imax) {initialize_grid();}
+
+    void display_parameters() const {
+        std::cout << "Resolution: " << n_x << "x" << n_y << std::endl;
+        std::cout << "Bounds: [" << x_L << ", " << y_L << "] to [" << x_R << ", " << y_R << "]" << std::endl;
+        std::cout << "Maximum iterations: " << I_max << std::endl;
+    }
+
     int pixel_color(size_t I, size_t J) const {
 
-        std::complex<double> c = grid[J * n_x + I];
+        std::complex<double> c = grid[I * n_y + J];
         std::complex<double> z = 0;
         bool check_mandelbrot = true;
 
@@ -40,14 +53,14 @@ private:
 
     }
 
-public:
-    Mandelbrot_set(unsigned int nx, unsigned int ny, double xl, double yl, double xr, double yr, short int imax)
-        : n_x(nx), n_y(ny), x_L(xl), y_L(yl), x_R(xr), y_R(yr), I_max(imax) {initialize_grid();}
-
-    void display_parameters() const {
-        std::cout << "Resolution: " << n_x << "x" << n_y << std::endl;
-        std::cout << "Bounds: [" << x_L << ", " << y_L << "] to [" << x_R << ", " << y_R << "]" << std::endl;
-        std::cout << "Maximum iterations: " << I_max << std::endl;
+    std::vector<unsigned char> generate_image() {
+        std::vector<unsigned char> image(n_x * n_y);
+        for (size_t i = 0; i < n_x; ++i) {
+            for (size_t j = 0; j < n_y; ++j) {
+                image[i * n_y + j] = static_cast<unsigned char>(pixel_color(i, j));
+            }
+        }
+        return image;
     }
 
 };
@@ -72,6 +85,8 @@ int main(int argc, char** argv) {
 
     Mandelbrot_set mandelbrot_set(n_x,n_y,x_L,y_L,x_R,y_R,I_max);
     mandelbrot_set.display_parameters();
+    auto image = mandelbrot_set.generate_image();
+    write_pgm_image(image.data(), 255, n_x, n_y, "mandelbrot.pgm");
 
     return 0;
 }

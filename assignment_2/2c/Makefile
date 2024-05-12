@@ -1,22 +1,23 @@
-CXXFLAGS += -Wall -std=c++11
+CXXFLAGS += -Wall -std=c++11 -g
+CFLAGS += -Wall -g
 EXE = main
-src=$(wildcard *.cpp)
-OBJS = $(src:.cpp=.o)
 
-
-n_x = 2
-n_y = 2
-x_L = -3
-y_L = -2
-x_R = 1.5
-y_R = 2
-I_max = 1000
+CPP_SRC = $(wildcard *.cpp)
+C_SRC = $(wildcard *.c)
+CPP_OBJS = $(CPP_SRC:.cpp=.o)
+C_OBJS = $(C_SRC:.c=.o)
+OBJS = $(CPP_OBJS) $(C_OBJS)
 
 .DEFAULT_GOAL = all
+n_x =  800
+n_y = 600
+x_L = -2.0
+y_L = -1.2
+x_R = 1.0
+y_R = 1.2
+I_max = 1000
 
 all: build
-
-.PHONY: all build run clean distclean
 
 build: $(EXE)
 
@@ -26,9 +27,18 @@ $(EXE): $(OBJS)
 run:
 	./$(EXE) $(n_x) $(n_y) $(x_L) $(y_L) $(x_R) $(y_R) $(I_max)
 
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
 clean:
-	$(RM) $(OBJS)
+	rm -f $(OBJ) $(EXE)
 
 distclean: clean
-	$(RM) $(EXE)
-	$(RM) *~
+	rm -f *~
+
+print-%: ; @echo $* = $($*)
+
