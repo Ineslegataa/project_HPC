@@ -26,6 +26,20 @@ private:
     }
     }
 
+    int pixel_color(size_t I, size_t J) const {
+
+        std::complex<double> c = grid[J * n_x + I];
+        std::complex<double> z = 0;
+        bool check_mandelbrot = true;
+
+        for (int n = 0; n < I_max; ++n) {
+            if (std::norm(z) > 4) return n;
+            z = z * z + c;
+        }
+        return 0;
+
+    }
+
 public:
     Mandelbrot_set(unsigned int nx, unsigned int ny, double xl, double yl, double xr, double yr, short int imax)
         : n_x(nx), n_y(ny), x_L(xl), y_L(yl), x_R(xr), y_R(yr), I_max(imax) {initialize_grid();}
